@@ -106,6 +106,7 @@ export default Signup;
 const styles = StyleSheet.create({
   signupContainer: {
     padding: 20,
+    backgroundColor: "#fff",
   },
 
   logoWrapper: {

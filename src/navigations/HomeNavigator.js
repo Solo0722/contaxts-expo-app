@@ -7,17 +7,59 @@ import {
   CREATE_CONTACT,
   SETTINGS,
 } from "../constants/routeNames";
-import Contacts from "../screens/contacts";
+import Contacts from "../screens/Contacts";
 import ContactDetail from "../screens/ContactDetail";
 import CreateContact from "../screens/CreateContact";
 import Settings from "../screens/Settings";
+import { Icon, Avatar, Pressable } from "native-base";
+import Ionicons from "@expo/vector-icons/Ionicons";
+import ProfileModal from "../components/ProfileModal";
 
-const HomeNavigator = () => {
+const HomeNavigator = ({ navigation }) => {
   const HomeStack = createStackNavigator();
 
+  const [profileModalVisible, setProfileModalVisible] = React.useState(false);
+
   return (
-    <HomeStack.Navigator initialRouteName={CONTACT_LIST}>
-      <HomeStack.Screen name={CONTACT_LIST} component={Contacts} />
+    <HomeStack.Navigator
+      initialRouteName={CONTACT_LIST}
+      screenOptions={{
+        headerShadowVisible: true,
+        headerStyle: {
+          shadowOpacity: 1,
+          shadowColor: "rgba(0,0,0,0.7)",
+        },
+      }}
+    >
+      <HomeStack.Screen
+        name={CONTACT_LIST}
+        component={Contacts}
+        options={{
+          headerTitleAlign: "center",
+          headerLeft: () => (
+            <Icon
+              as={Ionicons}
+              name="menu-outline"
+              size="xl"
+              paddingLeft={"8px"}
+              onPress={() => navigation.toggleDrawer()}
+            />
+          ),
+          headerRight: () => (
+            <>
+              <Pressable onPress={() => setProfileModalVisible(true)}>
+                <Avatar bg="indigo.500" size="sm" marginRight={"8px"}>
+                  S
+                </Avatar>
+              </Pressable>
+              <ProfileModal
+                profileModalVisible={profileModalVisible}
+                setProfileModalVisible={setProfileModalVisible}
+              />
+            </>
+          ),
+        }}
+      />
       <HomeStack.Screen name={CONTACT_DETAIL} component={ContactDetail} />
       <HomeStack.Screen name={CREATE_CONTACT} component={CreateContact} />
       <HomeStack.Screen name={SETTINGS} component={Settings} />

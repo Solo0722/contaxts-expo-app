@@ -102,6 +102,8 @@ export default Login;
 
 const styles = StyleSheet.create({
   loginContainer: {
+    backgroundColor: "#fff",
+
     flex: 1,
     padding: 20,
     alignItems: "center",

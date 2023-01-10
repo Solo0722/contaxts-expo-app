@@ -30,17 +30,6 @@ const DrawerContainer = ({ navigation }) => {
               variant="ghost"
               colorScheme="black"
               leftIcon={
-                <Icon as={Ionicons} name="person-circle-outline" size="sm" />
-              }
-              onPress={() => navigation.navigate(SETTINGS)}
-            >
-              Profile
-            </Button>
-            <Button
-              width={"100%"}
-              variant="ghost"
-              colorScheme="black"
-              leftIcon={
                 <Icon as={Ionicons} name="settings-outline" size="sm" />
               }
               onPress={() => navigation.navigate(SETTINGS)}
