@@ -1,12 +1,14 @@
 import { createDrawerNavigator } from "@react-navigation/drawer";
-import React from "react";
+import React, { useContext } from "react";
 import { HOME_NAVIGATOR, LOGIN, SETTINGS } from "../constants/routeNames";
 import HomeNavigator from "./HomeNavigator";
 import { Center, Image, VStack, Button, Icon, AlertDialog } from "native-base";
 import { SafeAreaView, StyleSheet, Text, View } from "react-native";
 import Ionicons from "@expo/vector-icons/Ionicons";
+import { GlobalContext } from "../context/context";
 
 const DrawerContainer = ({ navigation }) => {
+  const { setLoggedInUser } = useContext(GlobalContext);
   const [isOpen, setIsOpen] = React.useState(false);
 
   const onClose = () => setIsOpen(false);
@@ -73,8 +75,11 @@ const DrawerContainer = ({ navigation }) => {
               >
                 Cancel
               </Button>
-              <Button colorScheme="danger" onPress={onClose}>
-                Delete
+              <Button
+                colorScheme="danger"
+                onPress={() => setLoggedInUser(null)}
+              >
+                Ok
               </Button>
             </Button.Group>
           </AlertDialog.Footer>

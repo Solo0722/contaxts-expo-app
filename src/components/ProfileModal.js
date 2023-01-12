@@ -14,7 +14,7 @@ const ProfileModal = ({ profileModalVisible, setProfileModalVisible }) => {
       >
         <Modal.Content>
           <Modal.CloseButton />
-          <Modal.Header>Forgot Password?</Modal.Header>
+          <Modal.Header>Profile</Modal.Header>
           <Modal.Body>
             Enter email address and we'll send a link to reset your password.
             <FormControl mt="3">

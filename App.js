@@ -1,5 +1,6 @@
 import { extendTheme, NativeBaseProvider } from "native-base";
 import "react-native-gesture-handler";
+import GlobalProvider from "./src/context/context";
 import AppNavigation from "./src/navigations";
 
 export default function App() {
@@ -22,7 +23,9 @@ export default function App() {
 
   return (
     <NativeBaseProvider theme={theme}>
-      <AppNavigation />
+      <GlobalProvider>
+        <AppNavigation />
+      </GlobalProvider>
     </NativeBaseProvider>
   );
 }

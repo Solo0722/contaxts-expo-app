@@ -9,6 +9,6 @@ export const pickImage = async () => {
   });
 
   if (!result.canceled) {
-    return result;
+    return result.assets[0];
   }
 };

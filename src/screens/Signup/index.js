@@ -1,5 +1,5 @@
 import { StyleSheet, Text, View, ScrollView } from "react-native";
-import React from "react";
+import React, { useContext, useState } from "react";
 import {
   Center,
   Image,
@@ -14,9 +14,105 @@ import {
 } from "native-base";
 import { LOGIN, SIGNUP } from "../../constants/routeNames";
 import { useNavigation } from "@react-navigation/native";
+import uuid from "react-native-uuid";
+import { client } from "../../helpers/sanity/sanityClient";
+import { GlobalContext } from "../../context/context";
 
 const Signup = () => {
   const { navigate } = useNavigation();
+  const { setLoggedInUser } = useContext(GlobalContext);
+
+  const [signupFormData, setSignupFormData] = useState({
+    username: null,
+    firstName: null,
+    lastName: null,
+    email: null,
+    password: null,
+  });
+  const [errors, setErrors] = useState({});
+
+  const handleChange = (e, name) => {
+    setSignupFormData({
+      ...signupFormData,
+      [name]: e.trim(),
+    });
+  };
+
+  const validate = () => {
+    let regex = new RegExp("[a-z0-9]+@[a-z]+.[a-z]{2,4}");
+    if (!signupFormData.username) {
+      setErrors({
+        username: "Username is required",
+      });
+      return false;
+    }
+    if (signupFormData.username.length < 3) {
+      setErrors({
+        username: "Username must be at least 3 characters",
+      });
+      return false;
+    }
+    if (!signupFormData.firstName) {
+      setErrors({
+        firstName: "First name is required",
+      });
+      return false;
+    }
+    if (!signupFormData.lastName) {
+      setErrors({
+        lastName: "Last name is required",
+      });
+      return false;
+    }
+    if (!signupFormData.email) {
+      setErrors({
+        email: "Email is required",
+      });
+      return false;
+    }
+    if (regex.test(signupFormData.email) === false) {
+      setErrors({
+        email: "Email is not valid",
+      });
+      return false;
+    }
+    if (!signupFormData.password) {
+      setErrors({
+        password: "Password is required",
+      });
+      return false;
+    }
+    if (signupFormData.password.length < 6) {
+      setErrors({
+        ...errors,
+        password: "Password must be at least 6 characters",
+      });
+      return false;
+    }
+
+    return true;
+  };
+
+  const submitSignupForm = () => {
+    if (validate() == true) {
+      setErrors({});
+
+      const doc = {
+        _id: uuid.v4(),
+        _type: "user",
+        ...signupFormData,
+        imageUrl: null,
+        contacts: [],
+      };
+
+      client
+        .createIfNotExists(doc)
+        .then((result) => {
+          setLoggedInUser(result);
+        })
+        .catch((err) => console.error(err));
+    }
+  };
 
   return (
     <ScrollView style={styles.signupContainer}>
@@ -50,27 +146,69 @@ const Signup = () => {
           </Heading>
 
           <VStack space={3} mt="5">
-            <FormControl>
+            <FormControl isRequired isInvalid={"username" in errors}>
               <FormControl.Label>Username</FormControl.Label>
-              <Input />
+              <Input
+                value={signupFormData.username}
+                onChangeText={(e) => handleChange(e, "username")}
+              />
+              {"username" in errors && (
+                <FormControl.ErrorMessage>
+                  {errors.username}
+                </FormControl.ErrorMessage>
+              )}
             </FormControl>
-            <FormControl>
+            <FormControl isRequired isInvalid={"firstName" in errors}>
               <FormControl.Label>First name</FormControl.Label>
-              <Input />
+              <Input
+                value={signupFormData.firstName}
+                onChangeText={(e) => handleChange(e, "firstName")}
+              />
+              {"firstName" in errors && (
+                <FormControl.ErrorMessage>
+                  {errors.firstName}
+                </FormControl.ErrorMessage>
+              )}
             </FormControl>
-            <FormControl>
+            <FormControl isRequired isInvalid={"lastName" in errors}>
               <FormControl.Label>Last name</FormControl.Label>
-              <Input />
+              <Input
+                value={signupFormData.lastName}
+                onChangeText={(e) => handleChange(e, "lastName")}
+              />
+              {"lastName" in errors && (
+                <FormControl.ErrorMessage>
+                  {errors.lastName}
+                </FormControl.ErrorMessage>
+              )}
             </FormControl>
-            <FormControl>
+            <FormControl isRequired isInvalid={"email" in errors}>
               <FormControl.Label>Email</FormControl.Label>
-              <Input type="email" />
+              <Input
+                keyboardType="email-address"
+                value={signupFormData.email}
+                onChangeText={(e) => handleChange(e, "email")}
+              />
+              {"email" in errors && (
+                <FormControl.ErrorMessage>
+                  {errors.email}
+                </FormControl.ErrorMessage>
+              )}
             </FormControl>
-            <FormControl>
+            <FormControl isRequired isInvalid={"password" in errors}>
               <FormControl.Label>Password</FormControl.Label>
-              <Input type="password" />
+              <Input
+                type="password"
+                value={signupFormData.password}
+                onChangeText={(e) => handleChange(e, "password")}
+              />
+              {"password" in errors && (
+                <FormControl.ErrorMessage>
+                  {errors.password}
+                </FormControl.ErrorMessage>
+              )}
             </FormControl>
-            <Button mt="2" colorScheme="indigo">
+            <Button onPress={submitSignupForm} mt="2" colorScheme="indigo">
               Sign up
             </Button>
             <HStack mt="6" justifyContent="center">

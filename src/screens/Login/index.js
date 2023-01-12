@@ -1,5 +1,5 @@
 import { StyleSheet, Text, View } from "react-native";
-import React from "react";
+import React, { useContext, useState } from "react";
 import {
   Center,
   Image,
@@ -14,9 +14,60 @@ import {
 } from "native-base";
 import { SIGNUP } from "../../constants/routeNames";
 import { useNavigation } from "@react-navigation/native";
+import { client } from "../../helpers/sanity/sanityClient";
+import { userQuery } from "../../helpers/sanity/sanityQueries";
+import { GlobalContext } from "../../context/context";
 
 const Login = () => {
   const { navigate } = useNavigation();
+  const { setLoggedInUser } = useContext(GlobalContext);
+
+  const [loginFormData, setLoginFormData] = useState({
+    username: null,
+    password: null,
+  });
+  const [errors, setErrors] = React.useState({});
+
+  const handleChange = (e, name) => {
+    setLoginFormData({
+      ...loginFormData,
+      [name]: e,
+    });
+  };
+
+  const validate = () => {
+    if (!loginFormData.username) {
+      setErrors({
+        username: "Username is required",
+      });
+      return false;
+    }
+    if (!loginFormData.password) {
+      setErrors({
+        password: "Password is required",
+      });
+
+      return false;
+    }
+
+    return true;
+  };
+
+  const submitLoginForm = () => {
+    if (validate() == true) {
+      setErrors({});
+      const q = userQuery(
+        loginFormData.username.trim(),
+        loginFormData.password.trim()
+      );
+      client
+        .fetch(q)
+        .then((result) => {
+          setLoggedInUser(result[0]);
+        })
+        .catch((err) => console.log(err));
+    }
+  };
 
   return (
     <View style={styles.loginContainer}>
@@ -49,26 +100,28 @@ const Login = () => {
         </Heading>
 
         <VStack space={3} mt="5">
-          <FormControl>
+          <FormControl isInvalid={"username" in errors}>
             <FormControl.Label>Username</FormControl.Label>
-            <Input />
+            <Input onChangeText={(e) => handleChange(e, "username")} />
+            {"username" in errors && (
+              <FormControl.ErrorMessage>
+                {errors.username}
+              </FormControl.ErrorMessage>
+            )}
           </FormControl>
-          <FormControl>
+          <FormControl isInvalid={"password" in errors}>
             <FormControl.Label>Password</FormControl.Label>
-            <Input type="password" />
-            <Link
-              _text={{
-                fontSize: "xs",
-                fontWeight: "500",
-                color: "indigo.500",
-              }}
-              alignSelf="flex-end"
-              mt="1"
-            >
-              Forgot Password?
-            </Link>
+            <Input
+              type="password"
+              onChangeText={(e) => handleChange(e, "password")}
+            />
+            {"password" in errors && (
+              <FormControl.ErrorMessage>
+                {errors.password}
+              </FormControl.ErrorMessage>
+            )}
           </FormControl>
-          <Button mt="2" colorScheme="indigo">
+          <Button onPress={submitLoginForm} mt="2" colorScheme="indigo">
             Sign in
           </Button>
           <HStack mt="6" justifyContent="center">
