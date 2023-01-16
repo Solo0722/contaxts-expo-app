@@ -10,6 +10,7 @@ import {
   HStack,
   Button,
   Popover,
+  ScrollView,
 } from "native-base";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { useEffect } from "react";
@@ -18,6 +19,9 @@ import { client } from "../../helpers/sanity/sanityClient";
 import { DEFAULT_IMAGE_URI } from "../../constants/general";
 import SpinnerAnimation from "../../components/SpinnerAnimation";
 import { CONTACT_LIST, CREATE_CONTACT } from "../../constants/routeNames";
+import { callNumber } from "../../helpers/callNumber";
+import { messageNumber } from "../../helpers/messageNumber";
+import { openWhatsapp } from "../../helpers/openWhatsapp";
 
 const ContactDetail = ({ navigation, route }) => {
   const { contactId } = route.params;
@@ -34,15 +38,10 @@ const ContactDetail = ({ navigation, route }) => {
           headerRight: () => {
             return (
               <HStack space={2} mr={5}>
-                {result[0].isFavorite ? (
+                {result[0].isFavorite === true && (
                   <IconButton
                     colorScheme={"lime"}
                     icon={<Icon as={Ionicons} name="star" size="sm" />}
-                  />
-                ) : (
-                  <IconButton
-                    colorScheme={"lime"}
-                    icon={<Icon as={Ionicons} name="star-outline" size="sm" />}
                   />
                 )}
 
@@ -104,7 +103,7 @@ const ContactDetail = ({ navigation, route }) => {
   };
 
   return (
-    <View style={styles.contactDetailWrapper}>
+    <ScrollView style={styles.contactDetailWrapper}>
       {!contact ? (
         <SpinnerAnimation />
       ) : (
@@ -137,6 +136,9 @@ const ContactDetail = ({ navigation, route }) => {
               color: "indigo.100",
             }}
             style={styles.contactInfo}
+            onPress={() =>
+              callNumber(`${contact.countryCode}${contact.phoneNumber}`)
+            }
           >
             <View style={styles.secondaryCardWrapper}>
               <IconButton
@@ -162,6 +164,9 @@ const ContactDetail = ({ navigation, route }) => {
               <IconButton
                 icon={
                   <Icon as={Ionicons} name="chatbubble-outline" size="sm" />
+                }
+                onPress={() =>
+                  messageNumber(`${contact.countryCode}${contact.phoneNumber}`)
                 }
               />
             </View>
@@ -189,12 +194,38 @@ const ContactDetail = ({ navigation, route }) => {
               </View>
             </View>
           </Pressable>
+          <Pressable
+            _pressed={{
+              bgColor: "indigo.100",
+            }}
+            android_ripple={{
+              color: "indigo.100",
+            }}
+            style={[
+              styles.contactCard,
+              { paddingTop: 20, paddingBottom: 20, paddingLeft: 10 },
+            ]}
+            onPress={() =>
+              openWhatsapp(`${contact.countryCode}${contact.phoneNumber}`)
+            }
+          >
+            <View style={styles.secondaryCardWrapper}>
+              <IconButton
+                icon={<Icon as={Ionicons} name="logo-whatsapp" size="sm" />}
+              />
+              <View style={styles.nameWrapper}>
+                <Heading size="sm" fontWeight="600" color="coolGray.800">
+                  {`${contact.countryCode}${contact.phoneNumber}`}
+                </Heading>
+              </View>
+            </View>
+          </Pressable>
           <Button margin={10} onPress={handleEdit}>
             Edit Contact
           </Button>
         </View>
       )}
-    </View>
+    </ScrollView>
   );
 };
 

@@ -9,20 +9,20 @@ import { GlobalContext } from "../context/context";
 const Searchbar = ({ setLoading, setContacts }) => {
   const [searchTerm, setSearchTerm] = useState(null);
 
-  // const searchContact = () => {
-  //   if (searchTerm !== null || searchTerm !== "") {
-  //     const q = searchQuery(searchTerm);
-  //     setLoading(true);
-  //     client
-  //       .fetch(q)
-  //       .then((result) => {
-  //         console.log(result);
-  //         setContacts(result);
-  //         setLoading(false);
-  //       })
-  //       .catch((err) => console.error(err));
-  //   }
-  // };
+  const searchContact = () => {
+    if (searchTerm !== null || searchTerm !== "") {
+      const q = searchQuery(searchTerm.toLocaleLowerCase());
+      setLoading(true);
+      client
+        .fetch(q)
+        .then((result) => {
+          console.log(result);
+          setContacts(result);
+          setLoading(false);
+        })
+        .catch((err) => console.error(err));
+    }
+  };
 
   return (
     <View style={styles.searchbar}>
@@ -31,7 +31,7 @@ const Searchbar = ({ setLoading, setContacts }) => {
         variant={"filled"}
         InputRightElement={
           <IconButton
-            // onPress={searchContact}
+            onPress={searchContact}
             variant="ghost"
             icon={
               <Icon

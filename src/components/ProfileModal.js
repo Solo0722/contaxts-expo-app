@@ -1,8 +1,20 @@
 import { StyleSheet, Text, View } from "react-native";
-import React from "react";
-import { Modal, VStack, Button, FormControl, Input } from "native-base";
+import React, { useContext } from "react";
+import {
+  Modal,
+  VStack,
+  Button,
+  FormControl,
+  Input,
+  Image,
+  Avatar,
+  Heading,
+} from "native-base";
+import { GlobalContext } from "../context/context";
+import { DEFAULT_IMAGE_URI } from "../constants/general";
 
 const ProfileModal = ({ profileModalVisible, setProfileModalVisible }) => {
+  const { currentUser } = useContext(GlobalContext);
   return (
     <>
       <Modal
@@ -14,22 +26,43 @@ const ProfileModal = ({ profileModalVisible, setProfileModalVisible }) => {
       >
         <Modal.Content>
           <Modal.CloseButton />
-          <Modal.Header>Profile</Modal.Header>
+          <Modal.Header>{currentUser.username}</Modal.Header>
           <Modal.Body>
-            Enter email address and we'll send a link to reset your password.
-            <FormControl mt="3">
-              <FormControl.Label>Email</FormControl.Label>
-              <Input />
-            </FormControl>
+            <VStack space={2} display={"flex"} alignItems="center">
+              <Avatar
+                bg="green.500"
+                source={{
+                  uri: DEFAULT_IMAGE_URI,
+                }}
+              >
+                {currentUser.username.slice(0, 1)}
+              </Avatar>
+              <Heading
+                size="xs"
+                fontSize={15}
+                fontWeight="600"
+                color="coolGray.800"
+              >
+                {`${currentUser.firstName} ${currentUser.lastName}`}
+              </Heading>
+              <Heading
+                mt="1"
+                color="coolGray.400"
+                fontWeight="medium"
+                size="xs"
+              >
+                {currentUser.email}
+              </Heading>
+            </VStack>
           </Modal.Body>
-          <Modal.Footer>
+          <Modal.Footer borderTopWidth={0}>
             <Button
               flex="1"
               onPress={() => {
                 setProfileModalVisible(false);
               }}
             >
-              Proceed
+              Manage Profile
             </Button>
           </Modal.Footer>
         </Modal.Content>

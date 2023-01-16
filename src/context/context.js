@@ -8,7 +8,6 @@ export const GlobalContext = createContext();
 const GlobalProvider = ({ children }) => {
   const { getItem, setItem, removeItem } = useAsyncStorage("currentUser");
   const [currentUser, setCurrentUser] = useState(null);
-  console.log("user: ", currentUser);
 
   const fetchCurrentUser = async () => {
     const user = await getItem();
@@ -26,6 +25,10 @@ const GlobalProvider = ({ children }) => {
     await removeItem();
     setCurrentUser(null);
   };
+
+  useEffect(() => {
+    fetchCurrentUser();
+  }, []);
 
   return (
     <GlobalContext.Provider
