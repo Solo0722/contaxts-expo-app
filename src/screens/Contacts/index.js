@@ -24,13 +24,13 @@ import Searchbar from "../../components/Searchbar";
 import { GlobalContext } from "../../context/context";
 import { contactsQuery } from "../../helpers/sanity/sanityQueries";
 import { client } from "../../helpers/sanity/sanityClient";
-import { useCustomAsyncStorage } from "../../helpers/hooks/useCustomAsyncStorage";
 import SpinnerAnimation from "../../components/SpinnerAnimation";
+import { DEFAULT_IMAGE_URI } from "../../constants/general";
 
 const Contacts = ({ navigation }) => {
-  const { loggedInUser } = useContext(GlobalContext);
+  const { currentUser } = useContext(GlobalContext);
+  const [contacts, setContacts] = useState([]);
 
-  const [contacts, setContacts] = useCustomAsyncStorage("contacts", []);
   const [loading, setLoading] = useState(false);
 
   const [refreshing, setRefreshing] = useState(false);
@@ -70,7 +70,7 @@ const Contacts = ({ navigation }) => {
               size={10}
               borderRadius={100}
               source={{
-                uri: item.imageUrl,
+                uri: item.imageUrl || DEFAULT_IMAGE_URI,
               }}
               alt="Alternate Text"
             />
@@ -103,7 +103,7 @@ const Contacts = ({ navigation }) => {
   };
 
   const getContacts = () => {
-    const q = contactsQuery(loggedInUser._id);
+    const q = contactsQuery(currentUser._id);
     setLoading(true);
     client
       .fetch(q)
@@ -115,7 +115,7 @@ const Contacts = ({ navigation }) => {
   };
 
   useEffect(() => {
-    loggedInUser && getContacts();
+    currentUser && getContacts();
   }, []);
 
   const handleRefresh = () => {
@@ -126,7 +126,7 @@ const Contacts = ({ navigation }) => {
 
   return (
     <View style={styles.contactsWrapper}>
-      <Searchbar />
+      <Searchbar setLoading={setLoading} setContacts={setContacts} />
       <View>
         {loading ? (
           <SpinnerAnimation />
@@ -155,7 +155,9 @@ const Contacts = ({ navigation }) => {
         colorScheme={"pink"}
         bottom={10}
         icon={<Icon color="white" as={<AntDesign name="plus" />} size="sm" />}
-        onPress={() => navigation.navigate(CREATE_CONTACT)}
+        onPress={() =>
+          navigation.navigate(CREATE_CONTACT, { contact: null, isEdit: false })
+        }
       />
     </View>
   );

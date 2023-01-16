@@ -8,7 +8,7 @@ import Ionicons from "@expo/vector-icons/Ionicons";
 import { GlobalContext } from "../context/context";
 
 const DrawerContainer = ({ navigation }) => {
-  const { setLoggedInUser } = useContext(GlobalContext);
+  const { removeUser } = useContext(GlobalContext);
   const [isOpen, setIsOpen] = React.useState(false);
 
   const onClose = () => setIsOpen(false);
@@ -77,7 +77,7 @@ const DrawerContainer = ({ navigation }) => {
               </Button>
               <Button
                 colorScheme="danger"
-                onPress={() => setLoggedInUser(null)}
+                onPress={async () => await removeUser()}
               >
                 Ok
               </Button>

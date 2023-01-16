@@ -9,6 +9,7 @@ import {
   Pressable,
   HStack,
   Button,
+  Popover,
 } from "native-base";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { useEffect } from "react";
@@ -16,6 +17,7 @@ import { singleContactQuery } from "../../helpers/sanity/sanityQueries";
 import { client } from "../../helpers/sanity/sanityClient";
 import { DEFAULT_IMAGE_URI } from "../../constants/general";
 import SpinnerAnimation from "../../components/SpinnerAnimation";
+import { CONTACT_LIST, CREATE_CONTACT } from "../../constants/routeNames";
 
 const ContactDetail = ({ navigation, route }) => {
   const { contactId } = route.params;
@@ -26,7 +28,6 @@ const ContactDetail = ({ navigation, route }) => {
     client
       .fetch(q)
       .then((result) => {
-        console.log(result);
         setContact(result[0]);
         navigation.setOptions({
           title: result[0].firstName,
@@ -45,10 +46,40 @@ const ContactDetail = ({ navigation, route }) => {
                   />
                 )}
 
-                <IconButton
-                  colorScheme={"danger"}
-                  icon={<Icon as={Ionicons} name="trash-outline" size="sm" />}
-                />
+                <Popover
+                  trigger={(triggerProps) => {
+                    return (
+                      <IconButton
+                        {...triggerProps}
+                        colorScheme={"danger"}
+                        icon={
+                          <Icon as={Ionicons} name="trash-outline" size="sm" />
+                        }
+                      />
+                    );
+                  }}
+                >
+                  <Popover.Content accessibilityLabel="Delete Customerd" w="56">
+                    <Popover.Arrow />
+                    <Popover.CloseButton />
+                    <Popover.Header>Delete Customer</Popover.Header>
+                    <Popover.Body>
+                      {`This will remove all data relating to ${
+                        contact ? contact.firstName : `this contact`
+                      }. This action cannot be reversed. Deleted data can not be recovered.`}
+                    </Popover.Body>
+                    <Popover.Footer justifyContent="flex-end">
+                      <Button.Group space={2}>
+                        <Button colorScheme="coolGray" variant="ghost">
+                          Cancel
+                        </Button>
+                        <Button colorScheme="danger" onPress={deleteContact}>
+                          Delete
+                        </Button>
+                      </Button.Group>
+                    </Popover.Footer>
+                  </Popover.Content>
+                </Popover>
               </HStack>
             );
           },
@@ -60,6 +91,17 @@ const ContactDetail = ({ navigation, route }) => {
   useEffect(() => {
     getContactDetail();
   }, []);
+
+  const handleEdit = () => {
+    navigation.navigate(CREATE_CONTACT, {
+      contact,
+      isEdit: true,
+    });
+  };
+
+  const deleteContact = () => {
+    client.delete(contactId).then(() => navigation.navigate(CONTACT_LIST));
+  };
 
   return (
     <View style={styles.contactDetailWrapper}>
@@ -147,7 +189,9 @@ const ContactDetail = ({ navigation, route }) => {
               </View>
             </View>
           </Pressable>
-          <Button margin={10}>Edit Contact</Button>
+          <Button margin={10} onPress={handleEdit}>
+            Edit Contact
+          </Button>
         </View>
       )}
     </View>

@@ -20,13 +20,14 @@ import { GlobalContext } from "../../context/context";
 
 const Login = () => {
   const { navigate } = useNavigation();
-  const { setLoggedInUser } = useContext(GlobalContext);
+  const { updateUser } = useContext(GlobalContext);
 
   const [loginFormData, setLoginFormData] = useState({
     username: null,
     password: null,
   });
   const [errors, setErrors] = React.useState({});
+  const [loading, setLoading] = React.useState(false);
 
   const handleChange = (e, name) => {
     setLoginFormData({
@@ -55,6 +56,7 @@ const Login = () => {
 
   const submitLoginForm = () => {
     if (validate() == true) {
+      setLoading(true);
       setErrors({});
       const q = userQuery(
         loginFormData.username.trim(),
@@ -63,7 +65,8 @@ const Login = () => {
       client
         .fetch(q)
         .then((result) => {
-          setLoggedInUser(result[0]);
+          setLoading(false);
+          updateUser(result[0]);
         })
         .catch((err) => console.log(err));
     }
@@ -121,7 +124,12 @@ const Login = () => {
               </FormControl.ErrorMessage>
             )}
           </FormControl>
-          <Button onPress={submitLoginForm} mt="2" colorScheme="indigo">
+          <Button
+            isLoading={loading}
+            onPress={submitLoginForm}
+            mt="2"
+            colorScheme="indigo"
+          >
             Sign in
           </Button>
           <HStack mt="6" justifyContent="center">

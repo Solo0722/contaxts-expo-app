@@ -1,5 +1,12 @@
-import { StyleSheet, Text, View, Platform, StatusBar } from "react-native";
-import React, { useState } from "react";
+import {
+  StyleSheet,
+  Text,
+  View,
+  Platform,
+  StatusBar,
+  ScrollView,
+} from "react-native";
+import React, { useEffect, useState } from "react";
 import {
   VStack,
   Input,
@@ -15,6 +22,7 @@ import {
   useDisclose,
   Box,
   HStack,
+  useToast,
 } from "native-base";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { CountryPicker } from "react-native-country-codes-picker";
@@ -27,22 +35,32 @@ import uuid from "react-native-uuid";
 import { client } from "../../helpers/sanity/sanityClient";
 import { CONTACT_LIST } from "../../constants/routeNames";
 
-const CreateContact = ({ navigation }) => {
-  const [show, setShow] = useState(false);
-  const { loggedInUser } = useContext(GlobalContext);
+const CreateContact = ({ navigation, route }) => {
+  const { currentUser } = useContext(GlobalContext);
+  const { contact, isEdit } = route.params;
+  const toast = useToast();
 
+  const [show, setShow] = useState(false);
   const { isOpen, onOpen, onClose } = useDisclose();
 
   const [newContactData, setNewContactData] = useState({
-    firstName: null,
-    lastName: null,
-    countryCode: null,
-    phoneNumber: null,
-    isFavorite: false,
-    imageUrl: null,
+    firstName: isEdit ? contact.firstName : null,
+    lastName: isEdit ? contact.lastName : null,
+    countryCode: isEdit ? contact.countryCode : null,
+    phoneNumber: isEdit ? contact.phoneNumber : null,
+    isFavorite: isEdit ? contact.isFavorite : false,
+    imageUrl: isEdit ? contact.imageUrl : null,
   });
+  const [loading, setLoading] = useState(false);
 
   const [errors, setErrors] = useState({});
+
+  useEffect(() => {
+    isEdit &&
+      navigation.setOptions({
+        title: "Update Contact",
+      });
+  }, [isEdit]);
 
   const handleChange = (e, name) => {
     setNewContactData({
@@ -79,28 +97,53 @@ const CreateContact = ({ navigation }) => {
     if (validate() == true) {
       setErrors({});
 
+      setLoading(true);
       const doc = {
         _id: uuid.v4(),
         _type: "contact",
         ...newContactData,
         creator: {
           _type: "user",
-          _ref: loggedInUser._id,
+          _ref: currentUser._id,
         },
       };
 
       client
         .createIfNotExists(doc)
         .then((result) => {
-          console.log(result);
+          setLoading(false);
           navigation.navigate(CONTACT_LIST);
+          toast.show({
+            description: "Contact created. Refresh to update",
+          });
+        })
+        .catch((err) => console.error(err));
+    }
+  };
+
+  const submitUpdatedContactForm = () => {
+    if (validate() == true) {
+      setErrors({});
+
+      setLoading(true);
+
+      client
+        .patch(contact._id)
+        .set(newContactData)
+        .commit()
+        .then((result) => {
+          setLoading(false);
+          navigation.navigate(CONTACT_LIST);
+          toast.show({
+            description: "Contact updated. Refresh to update",
+          });
         })
         .catch((err) => console.error(err));
     }
   };
 
   return (
-    <View style={styles.createContactWrapper}>
+    <ScrollView style={styles.createContactWrapper}>
       <View style={styles.imagePickerWrapper}>
         <Image
           source={{ uri: newContactData.imageUrl || DEFAULT_IMAGE_URI }}
@@ -186,9 +229,25 @@ const CreateContact = ({ navigation }) => {
             onToggle={(e) => handleChange(e, "isFavorite")}
           />
         </View>
-        <Button mt="2" colorScheme="indigo" onPress={submitNewContactForm}>
-          Submit
-        </Button>
+        {isEdit ? (
+          <Button
+            mt="2"
+            colorScheme="indigo"
+            isLoading={loading}
+            onPress={submitUpdatedContactForm}
+          >
+            Update
+          </Button>
+        ) : (
+          <Button
+            mt="2"
+            colorScheme="indigo"
+            isLoading={loading}
+            onPress={submitNewContactForm}
+          >
+            Submit
+          </Button>
+        )}
       </VStack>
       <CountryPicker
         show={show}
@@ -221,7 +280,7 @@ const CreateContact = ({ navigation }) => {
           </Actionsheet.Item>
         </Actionsheet.Content>
       </Actionsheet>
-    </View>
+    </ScrollView>
   );
 };
 

@@ -1,33 +1,30 @@
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
-export function useCustomAsyncStorage(key, initialValue) {
-  const [storedValue, setStoredValue] = useState();
-
-  async function getStoredItem(key, initialValue) {
-    try {
-      const item = await AsyncStorage.getItem(key);
-      const value = item ? JSON.parse(item) : initialValue;
-      setStoredValue(value);
-    } catch (error) {
-      console.log(error);
-    }
-  }
+export const useCustomAsyncStorage = (key, initialValue) => {
+  const [data, setData] = useState(initialValue);
+  const [retrivedFromStorage, setRetrievedFromStorage] = useState(false);
 
   useEffect(() => {
-    getStoredItem(key, initialValue);
+    (async () => {
+      try {
+        const value = await AsyncStorage.getItem(key);
+        setData(JSON.parse(value) || initialValue);
+        setRetrievedFromStorage(true);
+      } catch (error) {
+        console.error("useAsyncStorage getItem error:", error);
+      }
+    })();
   }, [key, initialValue]);
 
-  const setValue = async (value) => {
+  const setNewData = async (value) => {
     try {
-      const valueToStore =
-        value instanceof Function ? value(storedValue) : value;
-      setStoredValue(valueToStore);
-      await AsyncStorage.setItem(key, JSON.stringify(valueToStore));
+      await AsyncStorage.setItem(key, JSON.stringify(value));
+      setData(value);
     } catch (error) {
-      console.log(error);
+      console.error("useAsyncStorage setItem error:", error);
     }
   };
 
-  return [storedValue, setValue];
-}
+  return [data, setNewData, retrivedFromStorage];
+};

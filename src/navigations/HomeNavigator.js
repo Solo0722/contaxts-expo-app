@@ -1,5 +1,5 @@
 import { Text, View } from "react-native";
-import React, { useContext } from "react";
+import React, { useContext, useEffect } from "react";
 import { createStackNavigator } from "@react-navigation/stack";
 import {
   CONTACT_DETAIL,
@@ -20,7 +20,7 @@ const HomeNavigator = ({ navigation }) => {
   const HomeStack = createStackNavigator();
 
   const [profileModalVisible, setProfileModalVisible] = React.useState(false);
-  const { loggedInUser } = useContext(GlobalContext);
+  const { currentUser } = useContext(GlobalContext);
 
   return (
     <HomeStack.Navigator
@@ -54,9 +54,9 @@ const HomeNavigator = ({ navigation }) => {
                   bg="indigo.500"
                   size="sm"
                   marginRight={"8px"}
-                  source={{ uri: loggedInUser.image }}
+                  source={{ uri: currentUser.image }}
                 >
-                  {loggedInUser ? loggedInUser.username.slice(0, 1) : "C"}
+                  {currentUser ? currentUser.username.slice(0, 1) : "C"}
                 </Avatar>
               </Pressable>
               <ProfileModal

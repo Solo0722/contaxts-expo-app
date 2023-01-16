@@ -12,3 +12,9 @@ export const singleContactQuery = (contactId) => {
   const query = `*[_type == 'contact' && _id == '${contactId}']`;
   return query;
 };
+
+export const searchQuery = (searchTerm) => {
+  const query = `*[_type == 'contact' && firstName match '${searchTerm}*' || lastName match '${searchTerm}*' || countryCode match '${searchTerm}*' || phoneNumber match '${searchTerm}*' ]`;
+
+  return query;
+};

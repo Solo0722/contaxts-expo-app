@@ -20,7 +20,8 @@ import { GlobalContext } from "../../context/context";
 
 const Signup = () => {
   const { navigate } = useNavigation();
-  const { setLoggedInUser } = useContext(GlobalContext);
+  const { updateUser } = useContext(GlobalContext);
+  const [loading, setLoading] = useState(false);
 
   const [signupFormData, setSignupFormData] = useState({
     username: null,
@@ -95,6 +96,7 @@ const Signup = () => {
 
   const submitSignupForm = () => {
     if (validate() == true) {
+      setLoading(true);
       setErrors({});
 
       const doc = {
@@ -108,7 +110,8 @@ const Signup = () => {
       client
         .createIfNotExists(doc)
         .then((result) => {
-          setLoggedInUser(result);
+          setLoading(false);
+          updateUser(result);
         })
         .catch((err) => console.error(err));
     }
@@ -208,7 +211,12 @@ const Signup = () => {
                 </FormControl.ErrorMessage>
               )}
             </FormControl>
-            <Button onPress={submitSignupForm} mt="2" colorScheme="indigo">
+            <Button
+              isLoading={loading}
+              onPress={submitSignupForm}
+              mt="2"
+              colorScheme="indigo"
+            >
               Sign up
             </Button>
             <HStack mt="6" justifyContent="center">

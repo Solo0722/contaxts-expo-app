@@ -6,11 +6,11 @@ import { useContext } from "react";
 import { GlobalContext } from "../context/context";
 
 const AppNavigation = () => {
-  const { loggedInUser } = useContext(GlobalContext);
+  const { currentUser } = useContext(GlobalContext);
 
   return (
     <NavigationContainer>
-      {loggedInUser ? <DrawerNavigator /> : <AuthNavigator />}
+      {currentUser !== null ? <DrawerNavigator /> : <AuthNavigator />}
     </NavigationContainer>
   );
 };
